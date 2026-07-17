@@ -4,12 +4,14 @@
  * Recebe do app (site) os dados + FAP preenchido + fotos + vídeo,
  * salva tudo no Drive e cria um RASCUNHO no Gmail para o fabricante.
  *
- * >>> DEPLOY (fazer 1 vez, logado na conta Gmail da Pneuweb) <<<
+ * >>> DEPLOY (fazer 1 vez, LOGADO NA CONTA DO SEU E-MAIL flavio.dzioba@pneuweb.com.br) <<<
+ *  Obs.: o rascunho sai desse e-mail. A conta que roda o script precisa ser a
+ *  dona de flavio.dzioba@pneuweb.com.br OU ter esse endereço em "Enviar como".
  *  1. https://script.google.com  ->  Novo projeto
  *  2. Cole este arquivo em Code.gs (apague o conteúdo padrão).
  *  3. Ajuste o CONFIG abaixo se quiser.
  *  4. Implantar > Nova implantação > Tipo: "App da Web"
- *       - Executar como: Eu (a conta da Pneuweb)
+ *       - Executar como: Eu (sua conta)
  *       - Quem pode acessar: "Qualquer pessoa"
  *  5. Copie a URL /exec e cole em config.js do site (BACKEND_URL).
  *  6. Na 1ª execução ele pede autorização do Drive/Gmail — autorize.
@@ -17,10 +19,12 @@
  */
 
 var CONFIG = {
-  PASTA_RAIZ: 'FAP Garantias',            // pasta no Drive onde os casos são guardados
+  PASTA_RAIZ: 'FAP Garantias',                 // pasta no Drive onde os casos são guardados
   ASSUNTO_PREFIXO: 'Solicitação de Garantia',
-  CC: 'flavio.dzioba@pneuweb.com.br',      // cópia interna (Flávio)
-  LIMITE_ANEXO_MB: 20                      // acima disso, fotos ficam só no Drive (link)
+  FROM: 'flavio.dzioba@pneuweb.com.br',        // remetente do rascunho (precisa ser a conta que roda o
+                                               // script OU um alias "Enviar como" dela no Gmail)
+  CC: 'flavio.dzioba@pneuweb.com.br',          // cópia interna
+  LIMITE_ANEXO_MB: 20                          // acima disso, fotos ficam só no Drive (link)
 };
 
 function doPost(e) {
@@ -74,6 +78,13 @@ function doPost(e) {
     var corpo = montarCorpo_(body, d, pasta.getUrl(), videoLink, fotosSoDrive);
     var opts = { attachments: anexos, name: 'Garantias Pneuweb' };
     if (CONFIG.CC) opts.cc = CONFIG.CC;
+    // remetente = seu e-mail (se for a conta atual ou um alias "Enviar como" dela)
+    if (CONFIG.FROM) {
+      var aliases = GmailApp.getAliases();
+      if (CONFIG.FROM === Session.getActiveUser().getEmail() || aliases.indexOf(CONFIG.FROM) >= 0) {
+        opts.from = CONFIG.FROM;
+      }
+    }
     var draft = GmailApp.createDraft(body.emailFabricante || '', assunto, corpo, opts);
 
     return json_({ ok: true, folderUrl: pasta.getUrl(), draftId: draft.getId(), fotosSoDrive: fotosSoDrive });
