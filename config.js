@@ -6,7 +6,7 @@
 window.FAP_CONFIG = {
   // URL do Web App do Apps Script (…/exec). Enquanto vazio, o app gera o
   // arquivo e as fotos pra baixar, sem enviar automático.
-  BACKEND_URL: '',
+  BACKEND_URL: 'https://script.google.com/macros/s/AKfycbym1j1hz2C3I6rgfmTI59x8syZIfwAooWNaeN9ZppKpQcW9rWxfHlYfnYLlHCOeqa3EQg/exec',
 
   // Marcas suportadas. Cada uma tem seu template de FAP e e-mail do fabricante.
   // Só a Sunset está ativa; as outras entram quando o Flávio passar FAP + e-mail.
