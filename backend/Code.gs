@@ -5,8 +5,9 @@
  * salva tudo no Drive e cria um RASCUNHO no Gmail para o fabricante.
  *
  * >>> DEPLOY (fazer 1 vez, LOGADO NA CONTA DO SEU E-MAIL flavio.dzioba@pneuweb.com.br) <<<
- *  Obs.: o rascunho sai desse e-mail. A conta que roda o script precisa ser a
- *  dona de flavio.dzioba@pneuweb.com.br OU ter esse endereço em "Enviar como".
+ *  Ao enviar o app, este script DISPARA o e-mail (com FAP + fotos) direto do seu
+ *  endereço para o fornecedor. A conta que roda o script precisa ser a dona de
+ *  flavio.dzioba@pneuweb.com.br OU ter esse endereço em "Enviar como" no Gmail.
  *  1. https://script.google.com  ->  Novo projeto
  *  2. Cole este arquivo em Code.gs (apague o conteúdo padrão).
  *  3. Ajuste o CONFIG abaixo se quiser.
@@ -23,7 +24,8 @@ var CONFIG = {
   ASSUNTO_PREFIXO: 'Solicitação de Garantia',
   FROM: 'flavio.dzioba@pneuweb.com.br',        // remetente do rascunho (precisa ser a conta que roda o
                                                // script OU um alias "Enviar como" dela no Gmail)
-  CC: 'flavio.dzioba@pneuweb.com.br',          // cópia interna
+  CC: 'flavio.dzioba@pneuweb.com.br',          // cópia interna (você recebe cópia do que foi enviado)
+  MODO_RASCUNHO: false,                        // false = ENVIA direto; true = só cria rascunho (p/ testar)
   LIMITE_ANEXO_MB: 20                          // acima disso, fotos ficam só no Drive (link)
 };
 
@@ -85,9 +87,16 @@ function doPost(e) {
         opts.from = CONFIG.FROM;
       }
     }
-    var draft = GmailApp.createDraft(body.emailFabricante || '', assunto, corpo, opts);
 
-    return json_({ ok: true, folderUrl: pasta.getUrl(), draftId: draft.getId(), fotosSoDrive: fotosSoDrive });
+    var destino = body.emailFabricante || '';
+    if (CONFIG.MODO_RASCUNHO) {
+      // (opcional) cria rascunho em vez de enviar — deixe CONFIG.MODO_RASCUNHO=true p/ testar sem disparar
+      var draft = GmailApp.createDraft(destino, assunto, corpo, opts);
+      return json_({ ok: true, enviado: false, rascunho: true, folderUrl: pasta.getUrl(), draftId: draft.getId(), fotosSoDrive: fotosSoDrive });
+    }
+    // ENVIA direto do seu e-mail para o fornecedor
+    GmailApp.sendEmail(destino, assunto, corpo, opts);
+    return json_({ ok: true, enviado: true, destino: destino, folderUrl: pasta.getUrl(), fotosSoDrive: fotosSoDrive });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   }

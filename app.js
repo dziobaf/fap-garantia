@@ -290,7 +290,7 @@
       .then(function (res) {
         overlay(false);
         if (res && res.ok) {
-          $('#fim-msg').textContent = 'Seus dados chegaram na Pneuweb e o formulário do fabricante já está montado. Nossa equipe vai revisar e dar andamento na garantia. Fica de olho no seu telefone/e-mail!';
+          $('#fim-msg').textContent = 'Sua solicitação foi enviada com o formulário e as fotos para análise da garantia. Nossa equipe acompanha o retorno. Fica de olho no seu telefone/e-mail!';
         } else {
           $('#fim-msg').textContent = 'Recebemos, mas houve um aviso no processamento. Nossa equipe foi notificada. Se quiser, guarde uma cópia do formulário abaixo.';
           addDownloadLink(fapBlob, data);
