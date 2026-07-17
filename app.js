@@ -41,6 +41,7 @@
     $$('[data-next]').forEach(function (b) { b.addEventListener('click', next); });
     $$('[data-prev]').forEach(function (b) { b.addEventListener('click', prev); });
     $('#aceite').addEventListener('change', function () { $('#enviar').disabled = !this.checked; });
+    $('#ciencia').addEventListener('change', function () { $('#btn-comecar').disabled = !this.checked; });
     $('#enviar').addEventListener('click', enviar);
     $('#video').addEventListener('change', onVideo);
     showStep(0);
@@ -72,6 +73,9 @@
     if (step === 'consumidor') {
       if (!$('#c_nome').value.trim()) faltando.push(['#c_nome', 'Informe seu nome']);
       if (!$('#c_telefone').value.trim()) faltando.push(['#c_telefone', 'Informe um telefone']);
+      var email = $('#c_email').value.trim();
+      if (!email) faltando.push(['#c_email', 'Informe um e-mail (o resultado vem por aqui)']);
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) faltando.push(['#c_email', 'E-mail inválido']);
     }
     if (step === 'produto') {
       if (!$('#p_medida').value.trim()) faltando.push(['#p_medida', 'Informe a medida']);

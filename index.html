@@ -36,7 +36,18 @@
           <li>Se possível, a medição da profundidade do sulco com paquímetro/régua.</li>
         </ul>
       </div>
-      <button class="btn primary" data-next>Começar</button>
+
+      <div class="aviso">
+        <strong>⚠️ Importante — leia antes de continuar</strong>
+        <p>A análise da garantia é feita pelo fabricante e o resultado sai em até <b>30 dias</b>.
+        Assim que recebermos o retorno, <b>encaminhamos o resultado pra você por e-mail</b>.
+        Por isso é <b>obrigatório informar um e-mail válido</b> que você acompanhe.</p>
+        <label class="check big">
+          <input type="checkbox" id="ciencia">
+          <span>Li e estou ciente de que o resultado será enviado ao meu e-mail.</span>
+        </label>
+      </div>
+      <button class="btn primary" data-next id="btn-comecar" disabled>Começar</button>
     </section>
 
     <!-- Passo 1: seus dados -->
@@ -52,7 +63,7 @@
       </div>
       <div class="row">
         <label class="field"><span>Telefone / WhatsApp *</span><input id="c_telefone" required inputmode="tel"></label>
-        <label class="field"><span>E-mail</span><input id="c_email" type="email"></label>
+        <label class="field"><span>E-mail *</span><input id="c_email" type="email" required></label>
       </div>
       <p class="hint">Onde você comprou (loja/revenda), se não foi direto conosco:</p>
       <label class="field"><span>Revendedor (opcional)</span><input id="r_nome"></label>
