@@ -74,21 +74,25 @@ function doPost(e) {
       videoLink = vfile.getUrl();
     }
 
-    // ---- Rascunho no Gmail ----
+    // ---- E-mail pro fornecedor ----
+    // código do caso: usado depois p/ casar a RESPOSTA do fornecedor com este cliente
+    var code = Utilities.getUuid().replace(/-/g, '').substring(0, 6).toUpperCase();
+    if (d.consumidor && d.consumidor.email) {
+      PropertiesService.getScriptProperties().setProperty('case_' + code, JSON.stringify({
+        email: d.consumidor.email,
+        nome: (d.consumidor.nome || ''),
+        produto: (((d.produto && d.produto.marca) || '') + ' ' + ((d.produto && d.produto.medida) || '')).trim()
+      }));
+    }
+
     var assunto = CONFIG.ASSUNTO_PREFIXO + ' — ' +
       (d.produto ? (d.produto.marca || '') + ' ' + (d.produto.medida || '') : '') +
-      ' — ' + (d.consumidor ? d.consumidor.nome : '');
+      ' — ' + (d.consumidor ? d.consumidor.nome : '') + ' [G-' + code + ']';
 
     var corpo = montarCorpo_(body, d, pasta.getUrl(), videoLink, fotosSoDrive);
     var opts = { attachments: anexos, name: 'Garantias PneuTop' };
     if (CONFIG.CC) opts.cc = CONFIG.CC;
-    // remetente = seu e-mail (se for a conta atual ou um alias "Enviar como" dela)
-    if (CONFIG.FROM) {
-      var aliases = GmailApp.getAliases();
-      if (CONFIG.FROM === Session.getActiveUser().getEmail() || aliases.indexOf(CONFIG.FROM) >= 0) {
-        opts.from = CONFIG.FROM;
-      }
-    }
+    var from = podeFrom_(); if (from) opts.from = from;   // remetente = seu e-mail
 
     var destino = body.emailFabricante || '';
     if (CONFIG.MODO_RASCUNHO) {
@@ -128,6 +132,82 @@ function pastaPorNome_(nome, pai) {
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// remetente permitido (conta atual ou alias "Enviar como")
+function podeFrom_() {
+  if (!CONFIG.FROM) return null;
+  try {
+    var aliases = GmailApp.getAliases();
+    if (CONFIG.FROM === Session.getActiveUser().getEmail() || aliases.indexOf(CONFIG.FROM) >= 0) return CONFIG.FROM;
+  } catch (e) {}
+  return null;
+}
+
+function pegarLabel_(nome) {
+  return GmailApp.getUserLabelByName(nome) || GmailApp.createLabel(nome);
+}
+
+/**
+ * Gatilho (roda a cada 15 min): acha respostas do fornecedor aos casos e
+ * monta um RASCUNHO pro e-mail do cliente com o retorno. Não envia — você revisa.
+ * (Pra deixar 100% automático depois: troque createDraft por sendEmail abaixo.)
+ */
+function verificarRespostasFornecedor() {
+  var meu = Session.getActiveUser().getEmail();
+  var label = pegarLabel_('fap-respondido');
+  var threads = GmailApp.search('subject:"[G-" -label:fap-respondido newer_than:180d');
+  threads.forEach(function (th) {
+    var msgs = th.getMessages();
+    var last = msgs[msgs.length - 1];
+    var fromLast = last.getFrom() || '';
+    // se a última mensagem foi enviada por nós, ainda não houve resposta do fornecedor
+    if (fromLast.indexOf(meu) >= 0 || (CONFIG.FROM && fromLast.indexOf(CONFIG.FROM) >= 0)) return;
+
+    var m = (th.getFirstMessageSubject() || '').match(/\[G-([A-Za-z0-9]+)\]/);
+    if (!m) return;
+    var raw = PropertiesService.getScriptProperties().getProperty('case_' + m[1]);
+    if (!raw) return;
+    var caso = JSON.parse(raw);
+    if (!caso.email) { th.addLabel(label); return; }
+
+    var assunto = 'Retorno da garantia do seu pneu' + (caso.produto ? ' — ' + caso.produto : '');
+    var opts = { name: 'Garantias PneuTop' };
+    try { var att = last.getAttachments(); if (att && att.length) opts.attachments = att; } catch (e) {}
+    var from = podeFrom_(); if (from) opts.from = from;
+
+    // MODO RASCUNHO (revisão): cria rascunho pro cliente. Depois é só clicar enviar.
+    GmailApp.createDraft(caso.email, assunto, montarCorpoCliente_(caso, last), opts);
+    // Pra 100% automático no futuro, comente a linha acima e use:
+    // GmailApp.sendEmail(caso.email, assunto, montarCorpoCliente_(caso, last), opts);
+
+    th.addLabel(label);
+  });
+}
+
+function montarCorpoCliente_(caso, msgFornecedor) {
+  var L = [];
+  L.push('Olá ' + (caso.nome ? caso.nome.split(' ')[0] : '') + ',');
+  L.push('');
+  L.push('Recebemos o retorno da análise de garantia do seu pneu' + (caso.produto ? ' (' + caso.produto + ')' : '') + '. Segue abaixo o resultado informado pelo fabricante:');
+  L.push('');
+  L.push('----------------------------------------');
+  try { L.push((msgFornecedor.getPlainBody() || '').trim()); } catch (e) {}
+  L.push('----------------------------------------');
+  L.push('');
+  L.push('Qualquer dúvida, estamos à disposição.');
+  L.push('Distribuidora PneuTop');
+  return L.join('\n');
+}
+
+// Rode UMA VEZ no editor (botão Executar) para autorizar tudo e ativar o gatilho de respostas.
+function configurar() {
+  DriveApp.getRootFolder();
+  GmailApp.getAliases();
+  pegarLabel_('fap-respondido');
+  var jah = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'verificarRespostasFornecedor'; });
+  if (!jah) ScriptApp.newTrigger('verificarRespostasFornecedor').timeBased().everyMinutes(15).create();
+  Logger.log('Configurado. Gatilho de respostas ativo (a cada 15 min). Conta: ' + Session.getActiveUser().getEmail());
 }
 
 // Rode UMA VEZ no editor (botão Executar) para autorizar Gmail + Drive.
