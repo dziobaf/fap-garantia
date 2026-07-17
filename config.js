@@ -15,7 +15,7 @@ window.FAP_CONFIG = {
       nome: 'Sunset',
       ativo: true,
       template: 'FAP_sunset.xlsx',
-      emailFabricante: 'dziobaf@gmail.com', // TESTE — reverter p/ garantia@sunset-pneus.com.br
+      emailFabricante: 'garantia@sunset-pneus.com.br',
       // marcas comerciais cobertas por esse FAP (aparecem no seletor de marca do pneu)
       marcasPneu: ['XBRI', 'Linglong', 'Autogreen', 'Trackmaxx', 'Landspider', 'Aderenza', 'Durable', 'Duraturn', 'Outra']
     }
