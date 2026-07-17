@@ -24,7 +24,7 @@ var CONFIG = {
   ASSUNTO_PREFIXO: 'Solicitação de Garantia',
   FROM: 'flavio.dzioba@pneuweb.com.br',        // remetente do rascunho (precisa ser a conta que roda o
                                                // script OU um alias "Enviar como" dela no Gmail)
-  CC: 'flavio.dzioba@pneuweb.com.br',          // cópia interna (você recebe cópia do que foi enviado)
+  CC: 'flavio.dzioba@pneuweb.com.br, contato@pneuweb.com.br', // cópia interna (em todos os e-mails)
   MODO_RASCUNHO: false,                        // false = ENVIA direto; true = só cria rascunho (p/ testar)
   LIMITE_ANEXO_MB: 15                          // total de anexos; acima disso as fotos ficam na pasta pública (link)
 };
@@ -173,6 +173,7 @@ function verificarRespostasFornecedor() {
 
     var assunto = 'Retorno da garantia do seu pneu' + (caso.produto ? ' — ' + caso.produto : '');
     var opts = { name: 'Garantias PneuTop' };
+    if (CONFIG.CC) opts.cc = CONFIG.CC;
     try { var att = last.getAttachments(); if (att && att.length) opts.attachments = att; } catch (e) {}
     var from = podeFrom_(); if (from) opts.from = from;
 
