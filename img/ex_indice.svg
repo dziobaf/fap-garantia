@@ -5,7 +5,7 @@
   <path d="M0,205 Q320,150 640,205" fill="none" stroke="#3a3f47" stroke-width="3"/>
   <!-- inscrição gravada -->
   <text x="320" y="255" text-anchor="middle" fill="#c9ced6" font-size="40" font-weight="700" letter-spacing="2">
-    195/65 R15 <tspan fill="#0e2a47" >91H</tspan>
+    195/65 R15 <tspan fill="#f5a623" font-weight="800">91H</tspan>
   </text>
   <!-- destaque no índice -->
   <rect x="405" y="222" width="118" height="52" rx="10" fill="none" stroke="#f5a623" stroke-width="5"/>
