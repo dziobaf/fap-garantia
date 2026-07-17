@@ -79,6 +79,12 @@ textarea{resize:vertical}
 @keyframes spin{to{transform:rotate(360deg)}}
 #progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:10}
 #progress-bar{height:100%;width:0;background:var(--accent);transition:width .3s}
+.ajuda{margin:-4px 0 14px;border:1px solid var(--line);border-radius:10px;background:#f7fafc;overflow:hidden}
+.ajuda summary{cursor:pointer;padding:9px 12px;font-size:13px;font-weight:700;color:var(--navy);list-style:none}
+.ajuda summary::-webkit-details-marker{display:none}
+.ajuda summary::before{content:"▸ ";color:var(--accent)}
+.ajuda[open] summary::before{content:"▾ "}
+.ajuda img{display:block;width:100%;max-width:420px;margin:0 auto 12px;padding:0 12px;border-radius:8px}
 .hidden{display:none!important}
 .err{color:var(--danger);font-size:13px;margin-top:4px}
 .linkbtn{display:inline-block;margin-top:10px;background:#eef2f6;color:var(--navy);padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:700}

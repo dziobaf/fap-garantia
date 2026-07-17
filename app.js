@@ -185,7 +185,7 @@
       dataEnvio: hoje(),
       nf: { numero: $('#nf_num').value.trim(), serie: '', data: fmtData($('#nf_data').value) },
       consumidor: {
-        nome: $('#c_nome').value.trim(), cpf: $('#c_cpf').value.trim(), rg: $('#c_rg').value.trim(),
+        nome: $('#c_nome').value.trim(), cpf: $('#c_cpf').value.trim(), rg: '',
         endereco: $('#c_endereco').value.trim(), cidade: $('#c_cidade').value.trim(),
         uf: $('#c_uf').value.trim().toUpperCase(), cep: $('#c_cep').value.trim(),
         telefone: $('#c_telefone').value.trim(), email: $('#c_email').value.trim()
@@ -204,7 +204,7 @@
       uso: { estrada: estrada, posicao: posicao, servico: servico },
       defeito: $('#d_defeito').value.trim(),
       danos: { materiais: $('#g_materiais').value, vitimas: $('#g_vitimas').value },
-      sulco: { original: $('#s_original').value.trim(), encontrada: $('#s_encontrada').value.trim() }
+      sulco: { original: '', encontrada: $('#s_encontrada').value.trim() }
     };
   }
 

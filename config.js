@@ -17,7 +17,7 @@ window.FAP_CONFIG = {
       template: 'FAP_sunset.xlsx',
       emailFabricante: 'garantia@sunset-pneus.com.br',
       // marcas comerciais cobertas por esse FAP (aparecem no seletor de marca do pneu)
-      marcasPneu: ['XBRI', 'Sunset', 'Servis', 'Outra']
+      marcasPneu: ['XBRI', 'Linglong', 'Autogreen', 'Trackmaxx', 'Landspider', 'Aderenza', 'Durable', 'Duraturn', 'Outra']
     }
     // exemplo p/ adicionar depois:
     // xbri: { nome:'XBRI', ativo:true, template:'FAP_xbri.xlsx', emailFabricante:'...', marcasPneu:['XBRI'] }

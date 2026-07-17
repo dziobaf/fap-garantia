@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="Arial, sans-serif">
+  <rect width="640" height="300" fill="#f2f4f7"/>
+  <!-- faixa lateral do pneu -->
+  <path d="M0,205 Q320,150 640,205 L640,300 L0,300 Z" fill="#23262b"/>
+  <path d="M0,205 Q320,150 640,205" fill="none" stroke="#3a3f47" stroke-width="3"/>
+  <!-- inscrição gravada -->
+  <text x="320" y="255" text-anchor="middle" fill="#c9ced6" font-size="40" font-weight="700" letter-spacing="2">
+    195/65 R15 <tspan fill="#0e2a47" >91H</tspan>
+  </text>
+  <!-- destaque no índice -->
+  <rect x="405" y="222" width="118" height="52" rx="10" fill="none" stroke="#f5a623" stroke-width="5"/>
+  <!-- callout -->
+  <line x1="464" y1="200" x2="464" y2="130" stroke="#f5a623" stroke-width="4"/>
+  <circle cx="464" cy="130" r="6" fill="#f5a623"/>
+  <rect x="150" y="34" width="440" height="86" rx="12" fill="#fff" stroke="#dce3ea"/>
+  <text x="370" y="63" text-anchor="middle" fill="#0e2a47" font-size="19" font-weight="700">Índice de carga + velocidade</text>
+  <text x="370" y="88" text-anchor="middle" fill="#66788a" font-size="16">Fica logo depois da medida. Ex.: </text>
+  <text x="370" y="108" text-anchor="middle" fill="#0e2a47" font-size="17" font-weight="700">91H  →  91 = carga · H = velocidade</text>
+  <!-- título -->
+  <text x="24" y="28" fill="#66788a" font-size="14">Onde encontrar (gravado na lateral do pneu):</text>
+</svg>

@@ -45,10 +45,7 @@
     <section class="card step hidden" data-step="consumidor">
       <h2>1. Seus dados</h2>
       <label class="field"><span>Nome completo *</span><input id="c_nome" required></label>
-      <div class="row">
-        <label class="field"><span>CPF</span><input id="c_cpf" inputmode="numeric"></label>
-        <label class="field"><span>RG</span><input id="c_rg"></label>
-      </div>
+      <label class="field"><span>CPF</span><input id="c_cpf" inputmode="numeric"></label>
       <label class="field"><span>Endereço</span><input id="c_endereco"></label>
       <div class="row">
         <label class="field grow"><span>Cidade</span><input id="c_cidade"></label>
@@ -75,12 +72,20 @@
         <label class="field"><span>Modelo</span><input id="p_modelo"></label>
         <label class="field"><span>Índice carga/vel. <small>(ex: 91H)</small></span><input id="p_lonas"></label>
       </div>
+      <details class="ajuda"><summary>📷 Onde encontrar o índice de carga/velocidade</summary>
+        <img src="img/ex_indice.svg" alt="Onde encontrar o índice de carga e velocidade">
+      </details>
       <div class="row">
         <label class="field"><span>Série <small>(matrícula/código de barras)</small></span><input id="p_serie"></label>
         <label class="field"><span>KM rodado</span><input id="p_km" inputmode="numeric"></label>
       </div>
+      <details class="ajuda"><summary>📷 Onde encontrar a Série</summary>
+        <img src="img/ex_serie_dot.jpg" alt="Onde encontrar a série e o DOT">
+      </details>
       <label class="field"><span>DOT * <small>(nº após a palavra DOT — os 4 últimos = semana/ano)</small></span><input id="p_dot" required></label>
-      <p class="hint">Na dúvida sobre Série e DOT, dá uma olhada no guia de fotos — a gente pede a foto deles também.</p>
+      <details class="ajuda"><summary>📷 Onde encontrar o DOT</summary>
+        <img src="img/ex_serie_dot.jpg" alt="Onde encontrar o DOT">
+      </details>
       <div class="row">
         <label class="field"><span>Nº da Nota Fiscal <small>(da sua compra)</small></span><input id="nf_num" inputmode="numeric"></label>
         <label class="field"><span>Data da compra</span><input id="nf_data" type="date"></label>
@@ -156,11 +161,11 @@
         <label class="field"><span>Houve vítimas?</span>
           <select id="g_vitimas"><option value="">—</option><option value="nao">Não</option><option value="sim">Sim</option></select></label>
       </div>
-      <p class="hint">Profundidade do sulco (se conseguir medir com paquímetro/régua):</p>
-      <div class="row">
-        <label class="field"><span>Sulco original (mm)</span><input id="s_original" inputmode="decimal" placeholder="ex: 8"></label>
-        <label class="field"><span>Sulco encontrado (mm) *</span><input id="s_encontrada" inputmode="decimal" placeholder="ex: 6,5"></label>
-      </div>
+      <p class="hint">Profundidade do sulco atual (meça com paquímetro/régua e mande a foto da medição):</p>
+      <label class="field"><span>Sulco atual (mm)</span><input id="s_encontrada" inputmode="decimal" placeholder="ex: 6,5"></label>
+      <details class="ajuda"><summary>📷 Como medir o sulco</summary>
+        <img src="img/ex_sulco.jpg" alt="Como medir o sulco com paquímetro">
+      </details>
       <nav class="nav"><button class="btn ghost" data-prev>Voltar</button><button class="btn primary" data-next>Continuar</button></nav>
     </section>
 
