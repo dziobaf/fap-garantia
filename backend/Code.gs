@@ -19,7 +19,7 @@
 var CONFIG = {
   PASTA_RAIZ: 'FAP Garantias',            // pasta no Drive onde os casos são guardados
   ASSUNTO_PREFIXO: 'Solicitação de Garantia',
-  CC: '',                                  // ex: 'garantia@pneuweb.com.br' (cópia interna)
+  CC: 'flavio.dzioba@pneuweb.com.br',      // cópia interna (Flávio)
   LIMITE_ANEXO_MB: 20                      // acima disso, fotos ficam só no Drive (link)
 };
 

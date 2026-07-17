@@ -27,6 +27,6 @@ window.FAP_CONFIG = {
   PNEUWEB: {
     empresa: 'Pneuweb / Distribuidora Pneutop',
     whatsapp: '5511998728650',
-    email: 'garantia@pneuweb.com.br'
+    email: 'flavio.dzioba@pneuweb.com.br'
   }
 };

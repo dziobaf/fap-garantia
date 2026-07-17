@@ -30,9 +30,15 @@ const JPG = path.join(__dirname, 'foto_teste.jpg');
   await click('[data-step="consumidor"] [data-next]');
 
   await step('produto');
+  const marcas = await page.$$eval('#p_marca option', els => els.map(e => e.value));
   await type('#p_medida', '195/65R15');
   await type('#p_dot', 'KT0V 0M50 4221');
   await type('#p_serie', '2410210281');
+  // abre as fotos-ajuda e tira print
+  await page.$$eval('[data-step="produto"] details.ajuda', ds => ds.forEach(d => d.open = true));
+  await new Promise(r => setTimeout(r, 400));
+  await page.screenshot({ path: path.join(__dirname, 'shot_produto.png'), fullPage: true });
+  console.log('marcas do pneu:', JSON.stringify(marcas));
   await click('[data-step="produto"] [data-next]');
 
   await step('veiculo');
