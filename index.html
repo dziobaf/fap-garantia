@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e2a47">
+  <title>Garantia de Pneu — Pneuweb</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">PNEUWEB</span>
+      <span class="sub">Solicitação de Garantia</span>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Passo 0: intro -->
+    <section class="card step" data-step="intro">
+      <h1>Abertura de garantia do seu pneu</h1>
+      <p class="lead">Preencha os dados abaixo e envie as fotos do pneu. Ao final,
+        montamos o formulário oficial do fabricante e cuidamos do resto. Leva uns 5 minutos.</p>
+
+      <label class="field">
+        <span>Fabricante do pneu</span>
+        <select id="marca" required></select>
+      </label>
+
+      <div class="dicas">
+        <strong>Antes de começar, separe:</strong>
+        <ul>
+          <li>Os dados do pneu (medida, marca, modelo, série e <b>DOT</b>);</li>
+          <li>Fotos do pneu conforme o guia (a gente mostra quais);</li>
+          <li>Se possível, a medição da profundidade do sulco com paquímetro/régua.</li>
+        </ul>
+      </div>
+      <button class="btn primary" data-next>Começar</button>
+    </section>
+
+    <!-- Passo 1: seus dados -->
+    <section class="card step hidden" data-step="consumidor">
+      <h2>1. Seus dados</h2>
+      <label class="field"><span>Nome completo *</span><input id="c_nome" required></label>
+      <div class="row">
+        <label class="field"><span>CPF</span><input id="c_cpf" inputmode="numeric"></label>
+        <label class="field"><span>RG</span><input id="c_rg"></label>
+      </div>
+      <label class="field"><span>Endereço</span><input id="c_endereco"></label>
+      <div class="row">
+        <label class="field grow"><span>Cidade</span><input id="c_cidade"></label>
+        <label class="field uf"><span>UF</span><input id="c_uf" maxlength="2"></label>
+        <label class="field"><span>CEP</span><input id="c_cep" inputmode="numeric"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Telefone / WhatsApp *</span><input id="c_telefone" required inputmode="tel"></label>
+        <label class="field"><span>E-mail</span><input id="c_email" type="email"></label>
+      </div>
+      <p class="hint">Onde você comprou (loja/revenda), se não foi direto conosco:</p>
+      <label class="field"><span>Revendedor (opcional)</span><input id="r_nome"></label>
+      <nav class="nav"><button class="btn ghost" data-prev>Voltar</button><button class="btn primary" data-next>Continuar</button></nav>
+    </section>
+
+    <!-- Passo 2: pneu -->
+    <section class="card step hidden" data-step="produto">
+      <h2>2. Dados do pneu</h2>
+      <div class="row">
+        <label class="field"><span>Medida * <small>(ex: 195/65R15)</small></span><input id="p_medida" required></label>
+        <label class="field"><span>Marca *</span><select id="p_marca"></select></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Modelo</span><input id="p_modelo"></label>
+        <label class="field"><span>Índice carga/vel. <small>(ex: 91H)</small></span><input id="p_lonas"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Série <small>(matrícula/código de barras)</small></span><input id="p_serie"></label>
+        <label class="field"><span>KM rodado</span><input id="p_km" inputmode="numeric"></label>
+      </div>
+      <label class="field"><span>DOT * <small>(nº após a palavra DOT — os 4 últimos = semana/ano)</small></span><input id="p_dot" required></label>
+      <p class="hint">Na dúvida sobre Série e DOT, dá uma olhada no guia de fotos — a gente pede a foto deles também.</p>
+      <div class="row">
+        <label class="field"><span>Nº da Nota Fiscal <small>(da sua compra)</small></span><input id="nf_num" inputmode="numeric"></label>
+        <label class="field"><span>Data da compra</span><input id="nf_data" type="date"></label>
+      </div>
+      <nav class="nav"><button class="btn ghost" data-prev>Voltar</button><button class="btn primary" data-next>Continuar</button></nav>
+    </section>
+
+    <!-- Passo 3: veículo + uso -->
+    <section class="card step hidden" data-step="veiculo">
+      <h2>3. Veículo e uso</h2>
+      <div class="row">
+        <label class="field grow"><span>Marca do veículo</span><input id="v_marca"></label>
+        <label class="field grow"><span>Modelo</span><input id="v_modelo"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Versão</span><input id="v_versao"></label>
+        <label class="field"><span>Ano</span><input id="v_ano" inputmode="numeric"></label>
+        <label class="field"><span>Placa</span><input id="v_placa"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Blindado?</span>
+          <select id="v_blindado"><option value="">—</option><option value="nao">Não</option><option value="sim">Sim</option></select></label>
+        <label class="field"><span>Elétrico?</span>
+          <select id="v_eletrico"><option value="">—</option><option value="nao">Não</option><option value="sim">Sim</option></select></label>
+      </div>
+
+      <fieldset class="fs">
+        <legend>Tipo de estrada</legend>
+        <div class="chips" data-single id="u_estrada">
+          <label><input type="radio" name="estrada" value="asfaltada">Asfaltada</label>
+          <label><input type="radio" name="estrada" value="terra">De terra</label>
+          <label><input type="radio" name="estrada" value="pedras">De pedras</label>
+          <label><input type="radio" name="estrada" value="mista">Mista</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fs">
+        <legend>Posição de uso <small>(pode marcar mais de uma)</small></legend>
+        <div class="chips" id="u_posicao">
+          <label><input type="checkbox" value="dianteiro">Dianteiro</label>
+          <label><input type="checkbox" value="traseiro">Traseiro</label>
+          <label><input type="checkbox" value="reboque">Reboque</label>
+          <label><input type="checkbox" value="ladoEsq">Lado esq.</label>
+          <label><input type="checkbox" value="ladoDir">Lado dir.</label>
+          <label><input type="checkbox" value="int">Interno</label>
+          <label><input type="checkbox" value="ext">Externo</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fs">
+        <legend>Tipo de serviço</legend>
+        <div class="chips" data-single id="u_servico">
+          <label><input type="radio" name="servico" value="passeio">Passeio</label>
+          <label><input type="radio" name="servico" value="taxi">Táxi</label>
+          <label><input type="radio" name="servico" value="onibus">Ônibus</label>
+          <label><input type="radio" name="servico" value="caminhao">Caminhão</label>
+          <label><input type="radio" name="servico" value="caminhonete">Caminhonete</label>
+          <label><input type="radio" name="servico" value="vanVuc">Van/VUC</label>
+          <label><input type="radio" name="servico" value="outros">Outros</label>
+        </div>
+      </fieldset>
+      <nav class="nav"><button class="btn ghost" data-prev>Voltar</button><button class="btn primary" data-next>Continuar</button></nav>
+    </section>
+
+    <!-- Passo 4: defeito -->
+    <section class="card step hidden" data-step="defeito">
+      <h2>4. O que aconteceu</h2>
+      <label class="field"><span>Descreva o defeito / problema *</span>
+        <textarea id="d_defeito" rows="4" required placeholder="Ex: pneu apresentou bolha na lateral com pouca rodagem, sem ter batido em nada."></textarea></label>
+      <div class="row">
+        <label class="field"><span>Causou danos materiais?</span>
+          <select id="g_materiais"><option value="">—</option><option value="nao">Não</option><option value="sim">Sim</option></select></label>
+        <label class="field"><span>Houve vítimas?</span>
+          <select id="g_vitimas"><option value="">—</option><option value="nao">Não</option><option value="sim">Sim</option></select></label>
+      </div>
+      <p class="hint">Profundidade do sulco (se conseguir medir com paquímetro/régua):</p>
+      <div class="row">
+        <label class="field"><span>Sulco original (mm)</span><input id="s_original" inputmode="decimal" placeholder="ex: 8"></label>
+        <label class="field"><span>Sulco encontrado (mm) *</span><input id="s_encontrada" inputmode="decimal" placeholder="ex: 6,5"></label>
+      </div>
+      <nav class="nav"><button class="btn ghost" data-prev>Voltar</button><button class="btn primary" data-next>Continuar</button></nav>
+    </section>
+
+    <!-- Passo 5: fotos -->
+    <section class="card step hidden" data-step="fotos">
+      <h2>5. Fotos e vídeo</h2>
+      <p class="lead">Envie as fotos abaixo (pode tirar na hora). Quanto melhor as fotos,
+        mais rápido sai a análise. Toque em cada item pra adicionar.</p>
+      <div id="foto-grupos"></div>
+
+      <div class="video-box">
+        <span class="vg-title">🎥 Vídeo (opcional)</span>
+        <p class="hint">Um vídeo girando o pneu ajuda bastante. Se for grande, a gente sobe pra nuvem.</p>
+        <input type="file" id="video" accept="video/*" capture="environment">
+        <div id="video-info" class="file-info"></div>
+      </div>
+      <nav class="nav"><button class="btn ghost" data-prev>Voltar</button><button class="btn primary" data-next>Revisar</button></nav>
+    </section>
+
+    <!-- Passo 6: revisar e enviar -->
+    <section class="card step hidden" data-step="revisar">
+      <h2>6. Revisar e enviar</h2>
+      <div id="resumo" class="resumo"></div>
+      <label class="check big">
+        <input type="checkbox" id="aceite">
+        <span>Declaro que as informações são verdadeiras e que sou o proprietário/responsável pelo produto.</span>
+      </label>
+      <nav class="nav"><button class="btn ghost" data-prev>Voltar</button>
+        <button class="btn primary" id="enviar" disabled>Enviar solicitação</button></nav>
+    </section>
+
+    <!-- Sucesso -->
+    <section class="card step hidden" data-step="fim">
+      <div class="ok">✅</div>
+      <h2>Recebemos sua solicitação!</h2>
+      <p id="fim-msg" class="lead"></p>
+      <div id="fim-extra"></div>
+    </section>
+  </main>
+
+  <div id="overlay" class="overlay hidden">
+    <div class="spinner"></div>
+    <p id="overlay-msg">Montando o formulário e enviando…</p>
+  </div>
+
+  <div id="progress"><div id="progress-bar"></div></div>
+
+  <script src="jszip.min.js"></script>
+  <script src="config.js"></script>
+  <script src="fap-fill.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
