@@ -26,7 +26,7 @@ var CONFIG = {
                                                // script OU um alias "Enviar como" dela no Gmail)
   CC: 'flavio.dzioba@pneuweb.com.br',          // cópia interna (você recebe cópia do que foi enviado)
   MODO_RASCUNHO: false,                        // false = ENVIA direto; true = só cria rascunho (p/ testar)
-  LIMITE_ANEXO_MB: 20                          // acima disso, fotos ficam só no Drive (link)
+  LIMITE_ANEXO_MB: 15                          // total de anexos; acima disso as fotos ficam na pasta pública (link)
 };
 
 function doPost(e) {
@@ -40,6 +40,8 @@ function doPost(e) {
     // ---- Pasta do caso no Drive ----
     var raiz = pastaPorNome_(CONFIG.PASTA_RAIZ, DriveApp.getRootFolder());
     var pasta = raiz.createFolder(nomeCaso);
+    // pasta pública por link: qualquer link (fotos/vídeo/pasta) abre SEM pedir autorização
+    try { pasta.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
 
     var anexos = [];         // p/ o rascunho
     var somaBytes = 0;
@@ -126,6 +128,13 @@ function pastaPorNome_(nome, pai) {
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Rode UMA VEZ no editor (botão Executar) para autorizar Gmail + Drive.
+function autorizar() {
+  DriveApp.getRootFolder();
+  GmailApp.getAliases();
+  Logger.log('Autorizado como: ' + Session.getActiveUser().getEmail());
 }
 
 // Teste rápido no navegador (abrir a URL /exec) — confirma que está no ar.
