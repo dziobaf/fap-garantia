@@ -104,17 +104,24 @@
     GRUPOS.forEach(function (g) {
       var div = document.createElement('div');
       div.className = 'foto-grupo'; div.id = 'grp_' + g.id;
+      var mult = g.multi ? 'multiple' : '';
       div.innerHTML =
         '<div class="fg-head"><div class="fg-title">' + g.titulo +
-        (g.req ? ' <span class="req">*</span>' : '') + '</div>' +
-        '<button type="button" class="fg-add">+ Foto</button></div>' +
+        (g.req ? ' <span class="req">*</span>' : '') + '</div></div>' +
         '<div class="fg-desc">' + g.desc + '</div>' +
         '<div class="thumbs"></div>' +
-        '<input type="file" accept="image/*" capture="environment" ' + (g.multi ? 'multiple' : '') + ' hidden>';
+        '<div class="fg-btns">' +
+        '  <button type="button" class="fg-add cam">📷 Tirar foto</button>' +
+        '  <button type="button" class="fg-add file">📁 Escolher arquivo</button>' +
+        '</div>' +
+        '<input type="file" class="in-cam" accept="image/*" capture="environment" ' + mult + ' hidden>' +
+        '<input type="file" class="in-file" accept="image/*" ' + mult + ' hidden>';
       wrap.appendChild(div);
-      var input = $('input[type=file]', div);
-      $('.fg-add', div).addEventListener('click', function () { input.click(); });
-      input.addEventListener('change', function () { addFotos(g, input.files, div); input.value = ''; });
+      var inCam = $('.in-cam', div), inFile = $('.in-file', div);
+      $('.fg-add.cam', div).addEventListener('click', function () { inCam.click(); });
+      $('.fg-add.file', div).addEventListener('click', function () { inFile.click(); });
+      inCam.addEventListener('change', function () { addFotos(g, inCam.files, div); inCam.value = ''; });
+      inFile.addEventListener('change', function () { addFotos(g, inFile.files, div); inFile.value = ''; });
     });
   }
 
