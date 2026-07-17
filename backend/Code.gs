@@ -80,7 +80,7 @@ function doPost(e) {
       ' — ' + (d.consumidor ? d.consumidor.nome : '');
 
     var corpo = montarCorpo_(body, d, pasta.getUrl(), videoLink, fotosSoDrive);
-    var opts = { attachments: anexos, name: 'Garantias Pneuweb' };
+    var opts = { attachments: anexos, name: 'Garantias PneuTop' };
     if (CONFIG.CC) opts.cc = CONFIG.CC;
     // remetente = seu e-mail (se for a conta atual ou um alias "Enviar como" dela)
     if (CONFIG.FROM) {
@@ -117,7 +117,7 @@ function montarCorpo_(body, d, folderUrl, videoLink, fotosSoDrive) {
   L.push('Pasta com todos os arquivos: ' + folderUrl);
   L.push('');
   L.push('Atenciosamente,');
-  L.push('Pneuweb / Distribuidora Pneutop');
+  L.push('Distribuidora PneuTop');
   return L.join('\n');
 }
 

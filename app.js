@@ -310,7 +310,7 @@
       : 'Tudo pronto! Baixe o formulário abaixo e mande junto com as fotos pro nosso WhatsApp que a gente dá andamento.';
     addDownloadLink(fapBlob, data);
     var wa = 'https://wa.me/' + CFG.PNEUWEB.whatsapp + '?text=' + encodeURIComponent('Olá! Segue minha solicitação de garantia do pneu ' + (data.produto.medida || '') + '. Vou enviar o formulário e as fotos.');
-    var a = document.createElement('a'); a.href = wa; a.className = 'linkbtn'; a.target = '_blank'; a.textContent = '💬 Abrir WhatsApp da Pneuweb';
+    var a = document.createElement('a'); a.href = wa; a.className = 'linkbtn'; a.target = '_blank'; a.textContent = '💬 Abrir WhatsApp da PneuTop';
     $('#fim-extra').appendChild(a);
     showStep(STEPS.indexOf('fim'));
   }

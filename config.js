@@ -25,7 +25,7 @@ window.FAP_CONFIG = {
 
   // Dados de contato da Pneuweb (mostrados ao cliente / usados no fallback WhatsApp)
   PNEUWEB: {
-    empresa: 'Pneuweb / Distribuidora Pneutop',
+    empresa: 'Distribuidora PneuTop',
     whatsapp: '5511998728650',
     email: 'flavio.dzioba@pneuweb.com.br'
   }
