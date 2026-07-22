@@ -253,11 +253,15 @@
           Object.keys(fotos).forEach(function (gid) {
             fotos[gid].forEach(function (f) { fotosPayload.push({ grupo: gid, name: f.name, base64: f.dataUrl.split(',')[1] }); });
           });
+          // O vídeo NÃO vai no POST principal (estoura o limite ~30MB do Apps Script
+          // e derruba a solicitação inteira). Ele sobe depois, em pedaços (chunked).
           var payload = {
             marca: marcaKey, emailFabricante: marcaCfg.emailFabricante,
             data: data, resumoTexto: resumoTexto(data, fotosPayload.length),
             fap: { name: nomeArquivoFap(data), base64: fapB64 },
-            fotos: fotosPayload, video: videoData
+            fotos: fotosPayload, video: null,
+            temVideo: !!videoData,
+            videoInfo: videoData ? { name: videoData.name, mime: videoData.mime, sizeMB: videoData.sizeMB } : null
           };
           if (CFG.BACKEND_URL) enviarBackend(payload, fapBlob, data);
           else fallbackDownload(fapBlob, data);
@@ -292,19 +296,66 @@
       method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload)
     }).then(function (r) { return r.json(); })
       .then(function (res) {
-        overlay(false);
-        if (res && res.ok) {
-          $('#fim-msg').textContent = 'Sua solicitação foi enviada com o formulário e as fotos para análise da garantia. Nossa equipe acompanha o retorno. Fica de olho no seu telefone/e-mail!';
-        } else {
+        if (!res || !res.ok) {
+          overlay(false);
           $('#fim-msg').textContent = 'Recebemos, mas houve um aviso no processamento. Nossa equipe foi notificada. Se quiser, guarde uma cópia do formulário abaixo.';
           addDownloadLink(fapBlob, data);
+          showStep(STEPS.indexOf('fim'));
+          return;
         }
-        showStep(STEPS.indexOf('fim'));
+        // caso registrado (FAP + fotos + e-mail). Agora sobe o vídeo em pedaços, se houver.
+        if (videoData && res.folderId) {
+          enviarVideoChunks(res.folderId, videoData,
+            function () {
+              overlay(false);
+              $('#fim-msg').textContent = 'Sua solicitação (com o vídeo) foi enviada para análise da garantia. Nossa equipe acompanha o retorno. Fica de olho no seu telefone/e-mail!';
+              showStep(STEPS.indexOf('fim'));
+            },
+            function () {
+              // o caso JÁ está registrado; só o vídeo não subiu -> pede pelo WhatsApp
+              overlay(false);
+              var wa = (CFG.PNEUWEB && CFG.PNEUWEB.whatsapp) ? ' (' + CFG.PNEUWEB.whatsapp + ')' : '';
+              $('#fim-msg').textContent = 'Sua solicitação foi enviada com sucesso! Só o vídeo não subiu — por favor mande o vídeo no nosso WhatsApp' + wa + '. O resto já foi registrado.';
+              showStep(STEPS.indexOf('fim'));
+            });
+        } else {
+          overlay(false);
+          $('#fim-msg').textContent = 'Sua solicitação foi enviada com o formulário e as fotos para análise da garantia. Nossa equipe acompanha o retorno. Fica de olho no seu telefone/e-mail!';
+          showStep(STEPS.indexOf('fim'));
+        }
       })
       .catch(function () {
-        // rede falhou — cai pro fallback de download + WhatsApp
+        // rede falhou no envio principal (sem vídeo, deve ser raro) — fallback download + WhatsApp
         overlay(false); fallbackDownload(fapBlob, data, true);
       });
+  }
+
+  // Sobe o vídeo em fatias abaixo do limite do Apps Script. Divide a base64 em
+  // blocos múltiplos de 4 (fronteira de byte) para o backend remontar exato.
+  function enviarVideoChunks(folderId, video, onDone, onFail) {
+    var b64 = video.base64 || '';
+    var N = 24000000; // ~24MB de base64 por POST (=~18MB de vídeo), abaixo do limite ~30MB
+    var total = Math.max(1, Math.ceil(b64.length / N));
+    var i = 0;
+    function next() {
+      if (i >= total) { onDone(); return; }
+      overlay(true, 'Enviando vídeo… ' + Math.round((i / total) * 100) + '% (não feche a tela)');
+      var part = b64.substr(i * N, N);
+      fetch(CFG.BACKEND_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'videoChunk', folderId: folderId,
+          name: video.name, mime: video.mime,
+          index: i, total: total, dataB64: part
+        })
+      }).then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (!res || !res.ok) throw new Error((res && res.error) || 'chunk falhou');
+          i++; next();
+        })
+        .catch(function (err) { onFail(err); });
+    }
+    next();
   }
 
   function fallbackDownload(fapBlob, data, avisoRede) {

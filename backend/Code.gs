@@ -26,12 +26,15 @@ var CONFIG = {
                                                // script OU um alias "Enviar como" dela no Gmail)
   CC: 'flavio.dzioba@pneuweb.com.br, contato@pneuweb.com.br', // cópia interna (em todos os e-mails)
   MODO_RASCUNHO: false,                        // false = ENVIA direto; true = só cria rascunho (p/ testar)
-  LIMITE_ANEXO_MB: 15                          // total de anexos; acima disso as fotos ficam na pasta pública (link)
+  LIMITE_ANEXO_MB: 15,                         // total de anexos; acima disso as fotos ficam na pasta pública (link)
+  LOG_SHEET_ID: '1FRoE9YjQpJWNuitPyCkRrbuWO7NE8rycEaILYDlIIc4', // planilha de resultados
+  LOG_TAB: 'Garantias'
 };
 
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
+    if (body.action === 'videoChunk') return receberChunk_(body);
     var d = body.data || {};
     var stamp = Utilities.formatDate(new Date(), 'GMT-3', 'yyyy-MM-dd HH.mm');
     var nomeCaso = (d.consumidor && d.consumidor.nome ? d.consumidor.nome : 'cliente') +
@@ -95,14 +98,18 @@ function doPost(e) {
     var from = podeFrom_(); if (from) opts.from = from;   // remetente = seu e-mail
 
     var destino = body.emailFabricante || '';
+
+    // ---- Registro na planilha de resultados ----
+    logGarantia_(stamp, code, body, d, pasta.getUrl());
+
     if (CONFIG.MODO_RASCUNHO) {
       // (opcional) cria rascunho em vez de enviar — deixe CONFIG.MODO_RASCUNHO=true p/ testar sem disparar
       var draft = GmailApp.createDraft(destino, assunto, corpo, opts);
-      return json_({ ok: true, enviado: false, rascunho: true, folderUrl: pasta.getUrl(), draftId: draft.getId(), fotosSoDrive: fotosSoDrive });
+      return json_({ ok: true, enviado: false, rascunho: true, code: code, folderId: pasta.getId(), folderUrl: pasta.getUrl(), draftId: draft.getId(), fotosSoDrive: fotosSoDrive });
     }
     // ENVIA direto do seu e-mail para o fornecedor
     GmailApp.sendEmail(destino, assunto, corpo, opts);
-    return json_({ ok: true, enviado: true, destino: destino, folderUrl: pasta.getUrl(), fotosSoDrive: fotosSoDrive });
+    return json_({ ok: true, enviado: true, destino: destino, code: code, folderId: pasta.getId(), folderUrl: pasta.getUrl(), fotosSoDrive: fotosSoDrive });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   }
@@ -117,12 +124,96 @@ function montarCorpo_(body, d, folderUrl, videoLink, fotosSoDrive) {
   L.push(body.resumoTexto || '');
   L.push('');
   if (videoLink) L.push('Vídeo do pneu: ' + videoLink);
+  else if (body.temVideo) L.push('Vídeo do pneu: será anexado à pasta do caso (upload em processamento).');
   if (fotosSoDrive > 0) L.push('Obs.: ' + fotosSoDrive + ' foto(s) adicional(is) disponível(is) na pasta: ' + folderUrl);
   L.push('Pasta com todos os arquivos: ' + folderUrl);
   L.push('');
   L.push('Atenciosamente,');
   L.push('Distribuidora PneuTop');
   return L.join('\n');
+}
+
+// grava 1 linha na planilha de resultados a cada solicitação enviada
+function logGarantia_(stamp, code, body, d, folderUrl) {
+  try {
+    if (!CONFIG.LOG_SHEET_ID) return;
+    var sh = SpreadsheetApp.openById(CONFIG.LOG_SHEET_ID).getSheetByName(CONFIG.LOG_TAB);
+    if (!sh) return;
+    var cons = d.consumidor || {}, prod = d.produto || {}, nf = d.nf || {};
+    sh.appendRow([
+      stamp,                                    // A Data envio
+      code,                                     // B Código
+      body.marca || '',                         // C Fornecedor
+      cons.nome || '',                          // D Cliente
+      cons.telefone || '',                      // E Telefone
+      cons.email || '',                         // F E-mail
+      nf.numero || '',                          // G NF
+      prod.marca || '',                         // H Marca pneu
+      prod.medida || '',                        // I Medida
+      prod.modelo || '',                        // J Modelo
+      prod.dot || '',                           // K DOT
+      CONFIG.MODO_RASCUNHO ? 'Rascunho' : 'Enviado', // L Status
+      '',                                       // M Data retorno
+      '',                                       // N Resultado (laudo)
+      folderUrl || ''                           // O Pasta Drive
+    ]);
+  } catch (e) {}
+}
+
+// ---- Recebe o vídeo em pedaços (chunked) e remonta na pasta do caso ----
+// O app manda o vídeo dividido em fatias (cada POST < limite do Apps Script),
+// referenciando a pasta do caso (folderId). Na última fatia, remonta o arquivo.
+function receberChunk_(b) {
+  try {
+    var folder = DriveApp.getFolderById(b.folderId);
+    var partName = '__vidpart_' + pad4_(b.index) + '.bin';
+    // se for reenvio da mesma fatia, apaga a anterior
+    var old = folder.getFilesByName(partName);
+    while (old.hasNext()) old.next().setTrashed(true);
+    folder.createFile(Utilities.newBlob(Utilities.base64Decode(b.dataB64), 'application/octet-stream', partName));
+
+    if (b.index + 1 < b.total) return json_({ ok: true, received: b.index });
+
+    // última fatia -> remonta os bytes na ordem e cria o vídeo final
+    var bytes = [];
+    for (var i = 0; i < b.total; i++) {
+      var it = folder.getFilesByName('__vidpart_' + pad4_(i) + '.bin');
+      if (!it.hasNext()) return json_({ ok: false, error: 'faltou a parte ' + i });
+      bytes = bytes.concat(it.next().getBlob().getBytes());
+    }
+    var vfile = folder.createFile(Utilities.newBlob(bytes, b.mime || 'video/mp4', b.name || 'video.mp4'));
+    try { vfile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+    // limpa as fatias temporárias
+    for (var k = 0; k < b.total; k++) {
+      var it2 = folder.getFilesByName('__vidpart_' + pad4_(k) + '.bin');
+      while (it2.hasNext()) it2.next().setTrashed(true);
+    }
+    return json_({ ok: true, done: true, videoUrl: vfile.getUrl() });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
+}
+
+function pad4_(n) { n = String(n); while (n.length < 4) n = '0' + n; return n; }
+
+// atualiza a linha do caso (por código) com o laudo recebido do fornecedor
+function atualizarResultado_(code, msgFornecedor) {
+  try {
+    if (!CONFIG.LOG_SHEET_ID) return;
+    var sh = SpreadsheetApp.openById(CONFIG.LOG_SHEET_ID).getSheetByName(CONFIG.LOG_TAB);
+    if (!sh) return;
+    var vals = sh.getDataRange().getValues();
+    for (var r = 1; r < vals.length; r++) {
+      if (String(vals[r][1]) === String(code)) {
+        var laudo = '';
+        try { laudo = (msgFornecedor.getPlainBody() || '').trim().substring(0, 500); } catch (e) {}
+        sh.getRange(r + 1, 12).setValue('Respondido');
+        sh.getRange(r + 1, 13).setValue(Utilities.formatDate(new Date(), 'GMT-3', 'yyyy-MM-dd HH.mm'));
+        sh.getRange(r + 1, 14).setValue(laudo);
+        return;
+      }
+    }
+  } catch (e) {}
 }
 
 function pastaPorNome_(nome, pai) {
@@ -166,6 +257,10 @@ function verificarRespostasFornecedor() {
 
     var m = (th.getFirstMessageSubject() || '').match(/\[G-([A-Za-z0-9]+)\]/);
     if (!m) return;
+
+    // registra o laudo na planilha de resultados
+    atualizarResultado_(m[1], last);
+
     var raw = PropertiesService.getScriptProperties().getProperty('case_' + m[1]);
     if (!raw) return;
     var caso = JSON.parse(raw);
@@ -215,6 +310,7 @@ function configurar() {
 function autorizar() {
   DriveApp.getRootFolder();
   GmailApp.getAliases();
+  if (CONFIG.LOG_SHEET_ID) SpreadsheetApp.openById(CONFIG.LOG_SHEET_ID).getName();
   Logger.log('Autorizado como: ' + Session.getActiveUser().getEmail());
 }
 
