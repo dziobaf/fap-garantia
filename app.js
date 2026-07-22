@@ -304,6 +304,16 @@
           return;
         }
         // caso registrado (FAP + fotos + e-mail). Agora sobe o vídeo em pedaços, se houver.
+        // Teto ~30MB de vídeo (=~40MB base64): acima disso o Apps Script não consegue
+        // remontar (limite de memória) -> caso já fica registrado e vídeo vai pelo WhatsApp.
+        var VIDEO_MAX_B64 = 40000000;
+        if (videoData && res.folderId && (videoData.base64 || '').length > VIDEO_MAX_B64) {
+          overlay(false);
+          var waBig = (CFG.PNEUWEB && CFG.PNEUWEB.whatsapp) ? ' (' + CFG.PNEUWEB.whatsapp + ')' : '';
+          $('#fim-msg').textContent = 'Sua solicitação foi enviada com sucesso! Como o vídeo é grande, por favor mande só o vídeo no nosso WhatsApp' + waBig + '. O formulário e as fotos já foram registrados.';
+          showStep(STEPS.indexOf('fim'));
+          return;
+        }
         if (videoData && res.folderId) {
           enviarVideoChunks(res.folderId, videoData,
             function () {
